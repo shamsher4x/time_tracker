@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>🔥 Krishan ji · Study AI (Final Fix)</title>
+    <!-- Chart.js + datalabels -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- NLP & Fuzzy (optional) -->
+    <script src="https://unpkg.com/compromise@14.10.0/builds/compromise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.6.2/fuse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #ffd9e6, #ffb3c6);
+            min-height: 100vh;
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 1500px;
+            background: rgba(255,250,250,0.3);
+            backdrop-filter: blur(16px);
+            border-radius: 56px;
+            padding: 28px;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 30px 60px -15px rgba(180,60,110,0.4);
+        }
+
+        h1 {
+            font-size: clamp(2.2rem,5vw,3.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg,#a12b5a,#d45a8b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .animated-name {
+            display: inline-block;
+            animation: gentleGlow 3s infinite ease-in-out;
+        }
+        @keyframes gentleGlow {
+            0%,100% { text-shadow: 0 0 5px #ffb6c1; }
+            50% { text-shadow: 0 0 20px #ff69b4; }
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.5);
+            padding: 8px 25px;
+            border-radius: 50px;
+            margin-left: auto;
+            color: #871f4a;
+            font-weight: 600;
+        }
+
+        /* Auth Section */
+        .auth-section {
+            background: rgba(255,255,255,0.3);
+            border-radius: 60px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 20px;
+        }
+        .auth-section input {
+            background: white;
+            border: 2px solid #ffb6c1;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            flex: 1 1 200px;
+        }
+        .auth-section button {
+            background: #ff9eb5;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #b34167;
+            transition: 0.1s;
+        }
+        .auth-section button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #b34167;
+        }
+        #userInfo {
+            color: #871f4a;
+            font-weight: 600;
+        }
+
+        /* Mute button */
+        .mute-btn {
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid #ff9eb5;
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #871f4a;
+            margin-left: 10px;
+        }
+
+        /* AI Card */
+        .ai-card {
+            background: rgba(255,255,255,0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 70px;
+            padding: 24px 30px;
+            margin-bottom: 30px;
+        }
+        .ai-header {
+            font-size: 1.8rem;
+            color: #a12b5a;
+            margin-bottom: 18px;
+        }
+        .ai-input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .ai-input-row textarea {
+            flex: 1 1 300px;
+            background: white;
+            border: 2px solid #ffb6c1;
+            border-radius: 60px;
+            padding: 16px 24px;
+            font-size: 1.1rem;
+            resize: vertical;
+            outline: none;
+        }
+        .ai-input-row button {
+            background: #ff9eb5;
+            border: none;
+            border-radius: 60px;
+            padding: 0 45px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.4rem;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #b34167;
+        }
+        .ai-input-row button:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #b34167;
+        }
+
+        /* Main grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1.8fr;
+            gap: 28px;
+        }
+        @media (max-width:900px) { .main-grid { grid-template-columns:1fr; } }
+
+        .glass-card {
+            background: rgba(255,250,250,0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 56px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size:1.6rem; color:#971f50;
+            border-bottom:2px dashed #ffb6c1; padding-bottom:14px; margin-bottom:18px;
+        }
+
+        /* Manual form */
+        .manual-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .manual-form input, .manual-form select {
+            flex:1 1 140px;
+            background:rgba(255,255,255,0.8);
+            border:2px solid #ffb6c1;
+            border-radius:50px;
+            padding:12px 18px;
+        }
+        .manual-form button {
+            background:#ffb0c3;
+            border:none;
+            border-radius:50px;
+            padding:12px 28px;
+            color:white;
+            font-weight:600;
+            cursor:pointer;
+            box-shadow:0 5px 0 #b34167;
+        }
+        .manual-form button:active {
+            transform:translateY(3px);
+            box-shadow:0 2px 0 #b34167;
+        }
+
+        /* Timer with water fill */
+        .timer-card {
+            background: #ffe4f0;
+            border-radius: 56px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 1;
+        }
+        .water-fill-container {
+            position: absolute; bottom:0; left:0; width:100%;
+            background: linear-gradient(145deg,#4ec0e9,#2a9fd6);
+            transition: height 0.3s ease-out;
+            z-index: 0;
+            opacity:0.7;
+            border-radius:0 0 56px 56px;
+        }
+        .timer-content {
+            position: relative; z-index:2;
+            text-shadow:0 2px 5px rgba(255,255,255,0.5);
+        }
+        .timer-display {
+            font-size:3.5rem; font-weight:800; color:#b32e5a;
+            margin:10px 0;
+        }
+        .timer-actions button {
+            background:#ff9eb5; border:none; border-radius:50px;
+            padding:10px 25px; color:white; font-weight:600;
+            cursor:pointer; box-shadow:0 4px 0 #b34167;
+            margin:5px;
+        }
+        .timer-actions button:active { transform:translateY(2px); box-shadow:0 2px 0 #b34167; }
+        .timer-actions button:disabled { opacity:0.5; cursor:not-allowed; }
+
+        /* Slot list */
+        .slot-list-container { max-height:400px; overflow-y:auto; }
+        .slot-item {
+            background: rgba(255,235,240,0.7);
+            border-radius: 60px;
+            padding: 14px 18px;
+            margin: 8px 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 10px solid #ff80a5;
+        }
+        .slot-time {
+            background: #ffccdd;
+            padding: 5px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #871f4a;
+        }
+        .slot-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .play-btn, .tick-btn, .delete-btn {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            border: 2px solid;
+            background: white;
+            cursor: pointer;
+            font-size: 1.3rem;
+        }
+        .play-btn { border-color:#43aa8b; color:#43aa8b; }
+        .tick-btn { border-color:#ff80a5; color:#ff80a5; }
+        .tick-btn.completed { background:#ff80a5; color:white; }
+        .delete-btn { border-color:#b38b9b; color:#b38b9b; }
+        .delete-btn:hover { background:#b34167; color:white; }
+
+        /* Stats */
+        .stats-row { display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px; }
+        .stat-item {
+            flex:1 1 100px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 48px;
+            padding: 18px 10px;
+            text-align: center;
+        }
+        .stat-number { font-size:2rem; font-weight:800; color:#a12b5a; }
+
+        /* Subject filter */
+        .subject-filter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .subject-filter select {
+            flex:1;
+            background:rgba(255,255,255,0.7);
+            border:2px solid #ffb6c1;
+            border-radius:50px;
+            padding:10px 18px;
+        }
+
+        /* Calendar */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7,1fr);
+            gap:5px;
+            margin:15px 0;
+        }
+        .calendar-day-header { text-align:center; font-weight:600; color:#a55171; padding:5px; }
+        .calendar-day {
+            background:rgba(255,255,255,0.3);
+            border-radius:30px;
+            padding:8px 5px;
+            text-align:center;
+            cursor:pointer;
+            transition:0.2s;
+        }
+        .calendar-day.has-slot { background:#ff9eb5; color:white; font-weight:600; }
+        .calendar-day.today { border:3px solid #00ffff; background:#e0ffff; } /* Aqua border for today */
+        .calendar-day.selected { border:3px solid #b34167; background:#ffccdd; }
+        .calendar-day .fire-icon { margin-left:2px; font-size:0.8rem; }
+        .calendar-nav {
+            display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;
+        }
+        .calendar-nav button {
+            background:rgba(255,255,255,0.5);
+            border:none; border-radius:40px; padding:6px 16px; cursor:pointer;
+        }
+
+        .graph-container { height:250px; margin:20px 0; background:rgba(255,255,255,0.2); border-radius:40px; padding:8px; }
+        .footer-actions { display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; margin-top:20px; }
+        .footer-btn {
+            background:rgba(255,220,235,0.7); border:none; border-radius:50px;
+            padding:8px 22px; font-weight:600; color:#871f4a; cursor:pointer;
+        }
+        .filter-group { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+        .filter-btn {
+            background:rgba(255,255,255,0.5); border:2px solid #ff9eb5;
+            border-radius:40px; padding:7px 18px; font-weight:600; color:#9f2b58; cursor:pointer;
+        }
+        .filter-btn.active { background:#ff9eb5; color:white; }
+
+        .footer-total {
+            margin-top:25px; text-align:center; font-size:1.2rem; color:#871f4a;
+            border-top:2px dashed #ffb6c1; padding-top:15px;
+        }
+        .footer-total span {
+            font-weight:800; background:#ffccdd; padding:5px 20px; border-radius:50px;
+        }
+
+        /* About section */
+        .footer-about {
+            margin-top: 20px;
+            text-align: center;
+            color: #871f4a;
+            font-size: 0.95rem;
+            border-top: 2px dashed #ffb6c1;
+            padding-top: 15px;
+        }
+        .footer-about a { color: #a12b5a; text-decoration: none; }
+
+        @media (max-width:500px) {
+            .app { padding:16px; }
+            .ai-input-row button { width:100%; justify-content:center; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <h1>
+        <i class="fas fa-robot"></i> <span class="animated-name">Krishan ji</span>
+        <span class="badge"><i class="fas fa-fire"></i> streak fire</span>
+        <button class="mute-btn" id="muteBtn" onclick="toggleMute()"><i class="fas fa-volume-up"></i></button>
+    </h1>
+
+    <!-- Auth Section (username/password) -->
+    <div class="auth-section" id="authSection">
+        <input type="text" id="regUsername" placeholder="Username">
+        <input type="password" id="regPassword" placeholder="Password">
+        <button onclick="register()"><i class="fas fa-user-plus"></i> Register</button>
+        <button onclick="login()"><i class="fas fa-sign-in-alt"></i> Login</button>
+        <button onclick="logout()" id="logoutBtn" style="display:none;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <span id="userInfo"></span>
+    </div>
+
+    <!-- AI Card -->
+    <div class="ai-card">
+        <div class="ai-header"><i class="fas fa-wand-magic"></i> Talk to Krishan ji</div>
+        <div class="ai-input-row">
+            <textarea id="aiInput" placeholder="e.g., 'math 9-11 tomorrow and physics 2-4'"></textarea>
+            <button onclick="processAI()"><i class="fas fa-brain"></i> Create</button>
+        </div>
+        <div class="ai-hint" style="margin-top:10px; color:#a55171;">💡 I understand English, Hindi, typos</div>
+        <div id="aiSuggestions" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="main-grid">
+        <!-- Left column -->
+        <div class="left-col">
+            <!-- Manual add -->
+            <div class="glass-card">
+                <div class="card-title"><i class="fas fa-pencil"></i> Manual slot</div>
+                <div class="manual-form">
+                    <input type="text" id="manualSubject" placeholder="Subject">
+                    <input type="date" id="manualDate">
+                    <input type="time" id="manualStart">
+                    <input type="time" id="manualEnd">
+                    <button onclick="addManual()"><i class="fas fa-plus"></i> Add</button>
+                </div>
+            </div>
+
+            <!-- Active timer -->
+            <div class="glass-card" id="timerCard" style="display:none;">
+                <div class="card-title"><i class="fas fa-hourglass"></i> Active slot</div>
+                <div class="timer-card">
+                    <div class="water-fill-container" id="waterFill" style="height:0%"></div>
+                    <div class="timer-content">
+                        <div id="activeSubject" style="font-size:1.4rem;">Math</div>
+                        <div class="timer-display" id="timerCountdown">00:00</div>
+                        <div class="progress-text" id="progressPercent">0% complete</div>
+                        <div>ends at <span id="activeEnd">--:--</span></div>
+                        <div class="timer-actions">
+                            <button class="pause-btn" id="pauseBtn" onclick="pauseTimer()">Pause</button>
+                            <button class="resume-btn" id="resumeBtn" onclick="resumeTimer()" disabled>Resume</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next slot preview -->
+            <div class="glass-card" id="upcomingCard">
+                <div class="card-title"><i class="fas fa-clock"></i> Next slot</div>
+                <div id="nextSlotInfo" style="text-align:center; padding:10px;">No upcoming</div>
+            </div>
+
+            <!-- Slot list -->
+            <div class="glass-card" style="flex:1; display:flex; flex-direction:column;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="card-title" style="border:none;"><i class="fas fa-list"></i> All slots</div>
+                    <div>
+                        <button onclick="showTomorrow()" class="footer-btn" style="margin-right:5px;"><i class="fas fa-calendar-day"></i> Tomorrow</button>
+                        <button onclick="resetAll()" class="footer-btn"><i class="fas fa-trash"></i> Reset</button>
+                    </div>
+                </div>
+                <div class="slot-list-container">
+                    <ul class="slot-list" id="slotList"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="right-col">
+            <div class="glass-card">
+                <div class="card-title"><i class="fas fa-chart-pie"></i> Analytics</div>
+
+                <!-- Subject filter -->
+                <div class="subject-filter">
+                    <label for="subjectFilter"><i class="fas fa-filter"></i> Subject:</label>
+                    <select id="subjectFilter" onchange="updateStats()">
+                        <option value="all">All subjects</option>
+                    </select>
+                </div>
+
+                <!-- Total study time -->
+                <div class="stats-row">
+                    <div class="stat-item"><span class="stat-number" id="hourDay">0h 0m</span><div class="stat-label">1 Day</div></div>
+                    <div class="stat-item"><span class="stat-number" id="hourWeek">0h 0m</span><div class="stat-label">1 Week</div></div>
+                    <div class="stat-item"><span class="stat-number" id="hourMonth">0h 0m</span><div class="stat-label">1 Month</div></div>
+                    <div class="stat-item"><span class="stat-number" id="hour6Month">0h 0m</span><div class="stat-label">6 Months</div></div>
+                    <div class="stat-item"><span class="stat-number" id="hourYear">0h 0m</span><div class="stat-label">1 Year</div></div>
+                </div>
+
+                <!-- Streak & sessions -->
+                <div class="stats-row">
+                    <div class="stat-item"><span class="stat-number" id="totalSess">0</span><div class="stat-label">Sessions</div></div>
+                    <div class="stat-item"><span class="stat-number" id="streakVal">0</span> <i class="fas fa-fire" style="color:#ff7b00;"></i><div class="stat-label">Streak</div></div>
+                </div>
+
+                <!-- Calendar -->
+                <div class="card-title" style="font-size:1.3rem; margin-top:10px;"><i class="fas fa-calendar-alt"></i> Calendar</div>
+                <div class="calendar-nav">
+                    <button onclick="prevMonth()"><i class="fas fa-chevron-left"></i></button>
+                    <span id="calendarMonthYear">March 2026</span>
+                    <button onclick="nextMonth()"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+
+                <!-- Graph type filter -->
+                <div class="filter-group">
+                    <button class="filter-btn active" id="barBtn" onclick="setGraph('bar')"><i class="fas fa-chart-bar"></i> Daily</button>
+                    <button class="filter-btn" id="pieBtn" onclick="setGraph('pie')"><i class="fas fa-chart-pie"></i> Subject</button>
+                    <button class="filter-btn" id="scatterBtn" onclick="setGraph('scatter')"><i class="fas fa-chart-scatter"></i> Scatter</button>
+                </div>
+
+                <!-- Chart canvas -->
+                <div class="graph-container">
+                    <canvas id="mainChart"></canvas>
+                </div>
+
+                <!-- Footer actions -->
+                <div class="footer-actions">
+                    <button class="footer-btn" onclick="exportBackup()"><i class="fas fa-download"></i> Backup</button>
+                    <button class="footer-btn" onclick="importBackup()"><i class="fas fa-upload"></i> Restore</button>
+                    <button class="footer-btn" onclick="askNotif()"><i class="fas fa-bell"></i> Notify</button>
+                    <button class="footer-btn" onclick="goToToday()"><i class="fas fa-calendar-check"></i> Today</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer total time -->
+    <div class="footer-total">
+        <span id="totalOverall">0h 0m</span> total study time overall
+    </div>
+
+    <!-- About section -->
+    <div class="footer-about">
+        <i class="fas fa-info-circle"></i> About Krishan ji Study Tracker – v6.0 with auto date & aqua today | <a href="#">Privacy</a> | <a href="#">Terms</a>
+    </div>
+</div>
+
+<script>
+    (function() {
+        Chart.register(ChartDataLabels);
+
+        // ---------- Data & User System ----------
+        let slots = [];
+        let currentUser = localStorage.getItem('krishanji_currentUser') || null;
+        let usersDB = JSON.parse(localStorage.getItem('krishanji_users')) || {};
+
+        // ---------- Auth Functions ----------
+        window.register = function() {
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            if (!username || !password) return alert('Username/password required');
+            if (usersDB[username]) return alert('User already exists');
+            usersDB[username] = { password: password, data: [] };
+            localStorage.setItem('krishanji_users', JSON.stringify(usersDB));
+            alert('Registered successfully. Please login.');
+        };
+
+        window.login = function() {
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            if (!username || !password) return alert('Enter credentials');
+            if (!usersDB[username] || usersDB[username].password !== password) return alert('Invalid credentials');
+            currentUser = username;
+            localStorage.setItem('krishanji_currentUser', currentUser);
+            updateAuthUI();
+            loadUserData();
+        };
+
+        window.logout = function() {
+            currentUser = null;
+            localStorage.removeItem('krishanji_currentUser');
+            updateAuthUI();
+            loadDemoData();
+        };
+
+        function updateAuthUI() {
+            if (currentUser) {
+                document.getElementById('userInfo').innerText = `Logged in as ${currentUser}`;
+                document.getElementById('logoutBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('userInfo').innerText = '';
+                document.getElementById('logoutBtn').style.display = 'none';
+            }
+        }
+
+        function saveUserData() {
+            if (!currentUser) return;
+            usersDB[currentUser].data = slots;
+            localStorage.setItem('krishanji_users', JSON.stringify(usersDB));
+        }
+
+        function loadUserData() {
+            if (!currentUser) return;
+            slots = usersDB[currentUser].data || [];
+            slots = slots.map(s => ({ ...s, id: s.id || Date.now() + Math.random() }));
+            renderAll();
+        }
+
+        function loadDemoData() {
+            const saved = localStorage.getItem('krishanji_demo');
+            if (saved) {
+                try { slots = JSON.parse(saved); } catch { slots = []; }
+            } else {
+                const today = new Date().toISOString().split('T')[0];
+                slots = [
+                    { id: Date.now()-1000, subject: 'Math', start: '09:00', end: '10:30', completed: true, date: today },
+                    { id: Date.now()-2000, subject: 'Physics', start: '11:00', end: '12:15', completed: false, date: today },
+                ];
+            }
+            renderAll();
+        }
+
+        // Override save
+        function save() {
+            if (currentUser) {
+                saveUserData();
+            } else {
+                localStorage.setItem('krishanji_demo', JSON.stringify(slots));
+            }
+        }
+
+        // ---------- Helpers ----------
+        let currentChart = null;
+        let graphType = 'bar';
+        let currentCalendarDate = new Date();
+        let selectedCalendarDate = new Date().toISOString().split('T')[0];
+        let lastNotified = {};
+        let isMuted = false;
+        let timerPaused = false;
+        let pausedRemainingSeconds = 0;
+        let lastActiveId = null;
+
+        const subjectMapping = {
+            'math': 'Math', 'maths': 'Math', 'mathematics': 'Math',
+            'physics': 'Physics',
+            'chemistry': 'Chemistry',
+            'bio': 'Biology', 'biology': 'Biology',
+            'cs': 'Computer Science', 'computer': 'Computer Science',
+            'eng': 'English', 'english': 'English',
+            'hindi': 'Hindi',
+            'history': 'History',
+            'geography': 'Geography',
+        };
+        const fuse = new Fuse(Object.keys(subjectMapping), { threshold: 0.3 });
+
+        function correctSubject(raw) {
+            if (!raw) return 'Study';
+            raw = raw.toLowerCase().trim();
+            if (subjectMapping[raw]) return subjectMapping[raw];
+            const res = fuse.search(raw);
+            if (res.length) return subjectMapping[res[0].item];
+            return raw.charAt(0).toUpperCase() + raw.slice(1);
+        }
+
+        function mins(time) {
+            const [h, m] = time.split(':').map(Number);
+            return h*60 + m;
+        }
+
+        function formatHoursMinutes(totalMinutes) {
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return `${hours}h ${minutes}m`;
+        }
+
+        // ---------- Load initial data with today's date in manual input ----------
+        function load() {
+            if (currentUser) {
+                loadUserData();
+            } else {
+                loadDemoData();
+            }
+            // Set today's date in manual date input
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('manualDate').value = today;
+        }
+
+        // ---------- Update subject filter dropdown ----------
+        function updateSubjectFilter() {
+            const subjects = [...new Set(slots.map(s => s.subject))].sort();
+            const select = document.getElementById('subjectFilter');
+            const currentVal = select.value;
+            select.innerHTML = '<option value="all">All subjects</option>';
+            subjects.forEach(sub => {
+                select.innerHTML += `<option value="${sub}">${sub}</option>`;
+            });
+            select.value = currentVal && subjects.includes(currentVal) ? currentVal : 'all';
+        }
+
+        // ---------- Compute total minutes for a period and subject ----------
+        function totalMinutesForPeriod(startDate, subjectFilter = 'all') {
+            const startStr = startDate.toISOString().split('T')[0];
+            let totalMins = 0;
+            slots.filter(s => s.completed && s.date >= startStr && (subjectFilter === 'all' || s.subject === subjectFilter))
+                 .forEach(s => {
+                     totalMins += mins(s.end) - mins(s.start);
+                 });
+            return totalMins;
+        }
+
+        // ---------- Update stats based on subject filter ----------
+        function updateStats() {
+            const subjectFilter = document.getElementById('subjectFilter').value;
+            const now = new Date();
+
+            const dayStart = new Date(now); dayStart.setHours(0,0,0,0);
+            document.getElementById('hourDay').innerText = formatHoursMinutes(totalMinutesForPeriod(dayStart, subjectFilter));
+
+            const weekStart = new Date(now); weekStart.setDate(now.getDate()-7);
+            document.getElementById('hourWeek').innerText = formatHoursMinutes(totalMinutesForPeriod(weekStart, subjectFilter));
+
+            const monthStart = new Date(now); monthStart.setDate(now.getDate()-30);
+            document.getElementById('hourMonth').innerText = formatHoursMinutes(totalMinutesForPeriod(monthStart, subjectFilter));
+
+            const sixMonthStart = new Date(now); sixMonthStart.setDate(now.getDate()-180);
+            document.getElementById('hour6Month').innerText = formatHoursMinutes(totalMinutesForPeriod(sixMonthStart, subjectFilter));
+
+            const yearStart = new Date(now); yearStart.setDate(now.getDate()-365);
+            document.getElementById('hourYear').innerText = formatHoursMinutes(totalMinutesForPeriod(yearStart, subjectFilter));
+
+            document.getElementById('totalSess').innerText = slots.length;
+
+            const compDates = [...new Set(slots.filter(s => s.completed).map(s => s.date))].sort().reverse();
+            let streak = 0;
+            if (compDates.length) {
+                const today = now.toISOString().split('T')[0];
+                let cur = new Date(today);
+                while (true) {
+                    const d = cur.toISOString().split('T')[0];
+                    if (compDates.includes(d)) { streak++; cur.setDate(cur.getDate()-1); }
+                    else break;
+                }
+            }
+            document.getElementById('streakVal').innerText = streak;
+
+            let overallMins = 0;
+            slots.filter(s => s.completed).forEach(s => overallMins += mins(s.end) - mins(s.start));
+            document.getElementById('totalOverall').innerText = formatHoursMinutes(overallMins);
+        }
+
+        // ---------- Render slots ----------
+        function renderSlots(dateFilter = null) {
+            const container = document.getElementById('slotList');
+            let filtered = slots;
+            if (dateFilter) {
+                filtered = slots.filter(s => s.date === dateFilter);
+            }
+            if (!filtered.length) {
+                container.innerHTML = '<li style="list-style:none; text-align:center; padding:20px;">🌸 No slots for this day.</li>';
+                return;
+            }
+            const sorted = [...filtered].sort((a,b) => a.start.localeCompare(b.start));
+            container.innerHTML = '';
+            const today = new Date().toISOString().split('T')[0];
+            sorted.forEach(s => {
+                const li = document.createElement('li');
+                li.className = 'slot-item';
+                const dateShow = s.date === today ? 'Today' : s.date.slice(5);
+                li.innerHTML = `
+                    <div class="slot-info">
+                        <span class="slot-time">${dateShow} ${s.start}-${s.end}</span>
+                        <span class="slot-subject">${s.subject}</span>
+                        ${s.completed ? '<i class="fas fa-check-circle" style="color:#2e8b57;"></i>' : ''}
+                    </div>
+                    <div class="slot-actions">
+                        ${!s.completed ? `<button class="play-btn" onclick="startSlotNow('${s.id}')" title="Start now"><i class="fas fa-play"></i></button>` : ''}
+                        <button class="tick-btn ${s.completed ? 'completed' : ''}" onclick="toggle('${s.id}')" ${s.completed ? 'disabled' : ''}>
+                            <i class="fas ${s.completed ? 'fa-check' : 'fa-circle'}"></i>
+                        </button>
+                        <button class="delete-btn" onclick="del('${s.id}')"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        // ---------- Start slot now ----------
+        window.startSlotNow = function(id) {
+            const slot = slots.find(s => s.id == id);
+            if (!slot || slot.completed) return;
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const currentTime = now.toTimeString().slice(0,5);
+            const duration = mins(slot.end) - mins(slot.start);
+            if (duration <= 0) return;
+            const newEndMins = mins(currentTime) + duration;
+            const newEndHour = Math.floor(newEndMins / 60);
+            const newEndMin = newEndMins % 60;
+            const newEnd = `${newEndHour.toString().padStart(2,'0')}:${newEndMin.toString().padStart(2,'0')}`;
+            slot.date = today;
+            slot.start = currentTime;
+            slot.end = newEnd;
+            slot.completed = false;
+            save();
+            renderAll();
+        };
+
+        // ---------- Graph data ----------
+        function getBarData() {
+            const now = new Date();
+            let start = new Date(now);
+            start.setDate(now.getDate()-6);
+            const map = new Map();
+            slots.filter(s => s.completed).forEach(s => {
+                map.set(s.date, (map.get(s.date) || 0) + 1);
+            });
+            let labels = [], data = [];
+            let cur = new Date(start);
+            while (cur <= now) {
+                const key = cur.toISOString().split('T')[0];
+                labels.push(cur.toLocaleDateString('en-IN', { day:'2-digit', month:'short' }));
+                data.push(map.get(key) || 0);
+                cur.setDate(cur.getDate()+1);
+            }
+            return { labels, data };
+        }
+
+        function getPieData() {
+            const subMap = new Map();
+            slots.filter(s => s.completed).forEach(s => {
+                subMap.set(s.subject, (subMap.get(s.subject) || 0) + 1);
+            });
+            return { labels: [...subMap.keys()], data: [...subMap.values()] };
+        }
+
+        function getScatterData() {
+            return slots.filter(s => s.completed).map(s => {
+                const duration = (mins(s.end) - mins(s.start)) / 60;
+                return { x: new Date(s.date).getTime(), y: duration };
+            });
+        }
+
+        function renderChart() {
+            const canvas = document.getElementById('mainChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (currentChart) currentChart.destroy();
+
+            if (graphType === 'bar') {
+                const { labels, data } = getBarData();
+                currentChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels, datasets: [{ label: 'Sessions', data, backgroundColor: '#ff9eb5', borderRadius: 8 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+                });
+            } else if (graphType === 'pie') {
+                const { labels, data } = getPieData();
+                const total = data.reduce((a,b) => a+b, 0);
+                currentChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: { labels, datasets: [{ data, backgroundColor: ['#ff9eb5','#ffb3c6','#ffccdd','#ffd9e6','#fbb1c2','#ffa5b9'] }] },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            datalabels: {
+                                backgroundColor: 'rgba(255,255,255,0.7)',
+                                borderRadius: 20,
+                                padding: { top: 4, bottom:4, left:8, right:8 },
+                                font: { weight: 'bold', size: 12 },
+                                color: '#871f4a',
+                                formatter: (value, context) => ((value / total) * 100).toFixed(1) + '%'
+                            }
+                        }
+                    }
+                });
+            } else {
+                const points = getScatterData();
+                currentChart = new Chart(ctx, {
+                    type: 'scatter',
+                    data: { datasets: [{ label: 'Hours', data: points, backgroundColor: '#b34167', pointRadius: 6 }] },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: { x: { type: 'time', time: { unit: 'day' } }, y: { beginAtZero: true } },
+                        plugins: { datalabels: { display: false } }
+                    }
+                });
+            }
+        }
+
+        // ---------- Calendar with Streak Fire and Today Highlight ----------
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('calendarMonthYear').innerText = monthNames[month] + ' ' + year;
+
+            // --- Streak calculation for fire icons ---
+            const today = new Date().toISOString().split('T')[0];
+            const streakDates = [];
+            if (slots.length > 0) {
+                const completedDates = [...new Set(slots.filter(s => s.completed).map(s => s.date))].sort();
+                if (completedDates.length > 0) {
+                    // Find streak ending today
+                    let currentStreak = [];
+                    let cur = new Date(today);
+                    while (true) {
+                        const d = cur.toISOString().split('T')[0];
+                        if (completedDates.includes(d)) {
+                            currentStreak.push(d);
+                            cur.setDate(cur.getDate() - 1);
+                        } else {
+                            break;
+                        }
+                    }
+                    if (currentStreak.length > 0) {
+                        // mark all days from start to end of streak
+                        const streakStart = new Date(currentStreak[currentStreak.length - 1]);
+                        const streakEnd = new Date(currentStreak[0]);
+                        let s = new Date(streakStart);
+                        while (s <= streakEnd) {
+                            const dStr = s.toISOString().split('T')[0];
+                            streakDates.push(dStr);
+                            s.setDate(s.getDate() + 1);
+                        }
+                    }
+                }
+            }
+            // --- End streak calculation ---
+
+            let gridHtml = '';
+            const dayHeaders = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+            dayHeaders.forEach(d => { gridHtml += `<div class="calendar-day-header">${d}</div>`; });
+
+            // Empty cells before first day
+            for (let i = 0; i < firstDay; i++) {
+                gridHtml += `<div class="calendar-day"></div>`;
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+                const hasSlot = slots.some(s => s.date === dateStr);
+                const isSelected = dateStr === selectedCalendarDate;
+                const isStreakDay = streakDates.includes(dateStr);
+                const isToday = dateStr === today;
+                
+                let fireIcon = '';
+                if (isStreakDay) {
+                    fireIcon = ' 🔥';
+                }
+                
+                let todayClass = isToday ? 'today' : '';
+                gridHtml += `<div class="calendar-day ${hasSlot ? 'has-slot' : ''} ${isSelected ? 'selected' : ''} ${todayClass}" onclick="selectDate('${dateStr}')">${d}${fireIcon}</div>`;
+            }
+
+            document.getElementById('calendarGrid').innerHTML = gridHtml;
+        }
+
+        window.selectDate = function(dateStr) {
+            selectedCalendarDate = dateStr;
+            renderSlots(dateStr);
+            renderCalendar();
+        };
+
+        window.prevMonth = function() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar();
+        };
+        window.nextMonth = function() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar();
+        };
+        window.goToToday = function() {
+            const today = new Date().toISOString().split('T')[0];
+            selectedCalendarDate = today;
+            currentCalendarDate = new Date();
+            renderSlots(today);
+            renderCalendar();
+            // Also update manual date input to today
+            document.getElementById('manualDate').value = today;
+        };
+        window.showTomorrow = function() {
+            const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+            const dateStr = tomorrow.toISOString().split('T')[0];
+            selectedCalendarDate = dateStr;
+            renderSlots(dateStr);
+            currentCalendarDate = tomorrow;
+            renderCalendar();
+        };
+
+        // ---------- Timer update (optimized) ----------
+        let timerUpdatePending = false;
+        function scheduleTimerUpdate() {
+            if (!timerUpdatePending) {
+                timerUpdatePending = true;
+                requestAnimationFrame(() => {
+                    updateTimerAndNext();
+                    timerUpdatePending = false;
+                    setTimeout(scheduleTimerUpdate, 1000);
+                });
+            }
+        }
+        scheduleTimerUpdate();
+
+        function updateTimerAndNext() {
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const currentTime = now.toTimeString().slice(0,5);
+
+            if (!timerPaused) {
+                slots.forEach(s => {
+                    if (!s.completed && s.date === today && s.end <= currentTime) s.completed = true;
+                    if (!s.completed && s.date < today) s.completed = true;
+                });
+            }
+            let changed = false;
+            slots.forEach(s => {
+                if (!s.completed && s.date < today) { s.completed = true; changed = true; }
+                else if (!s.completed && s.date === today && s.end <= currentTime) { s.completed = true; changed = true; }
+            });
+            if (changed) { save(); renderAll(); }
+
+            const upcoming = slots.filter(s => !s.completed && (s.date > today || (s.date === today && s.start > currentTime)))
+                                 .sort((a,b) => a.date.localeCompare(b.date) || a.start.localeCompare(b.start));
+            const nextDiv = document.getElementById('nextSlotInfo');
+            if (upcoming.length) {
+                const next = upcoming[0];
+                nextDiv.innerHTML = `<strong>${next.subject}</strong> on ${next.date} at ${next.start}`;
+            } else nextDiv.innerHTML = 'No upcoming slots';
+
+            const active = slots.find(s => s.date === today && !s.completed && s.start <= currentTime && s.end >= currentTime);
+            const card = document.getElementById('timerCard');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const resumeBtn = document.getElementById('resumeBtn');
+            if (active) {
+                if (lastActiveId !== active.id) {
+                    lastActiveId = active.id;
+                    timerPaused = false;
+                    pauseBtn.disabled = false;
+                    resumeBtn.disabled = true;
+                }
+                card.style.display = 'block';
+                document.getElementById('activeSubject').innerText = active.subject;
+                document.getElementById('activeEnd').innerText = active.end;
+
+                const startM = mins(active.start);
+                const endM = mins(active.end);
+                const nowM = now.getHours()*60 + now.getMinutes();
+                const totalDuration = endM - startM;
+                let elapsed, remaining;
+                if (timerPaused) {
+                    remaining = pausedRemainingSeconds;
+                    elapsed = totalDuration*60 - remaining;
+                } else {
+                    elapsed = (nowM - startM) * 60;
+                    remaining = (endM - nowM) * 60;
+                }
+                const percent = Math.min(100, Math.max(0, (elapsed / (totalDuration*60)) * 100));
+                document.getElementById('waterFill').style.height = percent + '%';
+                document.getElementById('progressPercent').innerText = percent.toFixed(1) + '% complete';
+                const minsLeft = Math.floor(remaining / 60);
+                const secsLeft = Math.floor(remaining % 60);
+                document.getElementById('timerCountdown').innerText = `${minsLeft.toString().padStart(2,'0')}:${secsLeft.toString().padStart(2,'0')}`;
+            } else {
+                card.style.display = 'none';
+                lastActiveId = null;
+                timerPaused = false;
+            }
+        }
+
+        window.pauseTimer = function() {
+            if (timerPaused) return;
+            timerPaused = true;
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const currentTime = now.toTimeString().slice(0,5);
+            const active = slots.find(s => s.date === today && !s.completed && s.start <= currentTime && s.end >= currentTime);
+            if (active) {
+                const endM = mins(active.end);
+                const nowM = now.getHours()*60 + now.getMinutes();
+                pausedRemainingSeconds = (endM - nowM) * 60;
+            }
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('resumeBtn').disabled = false;
+        };
+
+        window.resumeTimer = function() {
+            if (!timerPaused) return;
+            timerPaused = false;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('resumeBtn').disabled = true;
+        };
+
+        window.toggleMute = function() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('muteBtn');
+            btn.innerHTML = isMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+        };
+
+        window.askNotif = function() {
+            if (!("Notification" in window)) return alert('Notifications not supported');
+            Notification.requestPermission();
+        };
+
+        function playBeep(type) {
+            if (isMuted) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                if (type === 'start') {
+                    osc.frequency.value = 880;
+                    gain.gain.value = 0.2;
+                    osc.start(); osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'end') {
+                    osc.frequency.value = 659.25;
+                    gain.gain.value = 0.2;
+                    osc.start(); osc.stop(ctx.currentTime + 0.5);
+                } else if (type === 'reminder') {
+                    osc.frequency.value = 523.25;
+                    gain.gain.value = 0.2;
+                    osc.start(); osc.stop(ctx.currentTime + 0.2);
+                }
+            } catch(e) {}
+        }
+
+        function checkEvents() {
+            if (isMuted) return;
+            const now = new Date();
+            const curTime = now.toTimeString().slice(0,5);
+            const today = now.toISOString().split('T')[0];
+            slots.filter(s => s.date === today && !s.completed).forEach(s => {
+                const startM = mins(s.start);
+                const nowM = now.getHours()*60 + now.getMinutes();
+                const id2min = s.id + '_2min';
+                const idStart = s.id + '_start';
+                const idEnd = s.id + '_end';
+                if (startM - nowM === 2 && !lastNotified[id2min]) {
+                    lastNotified[id2min] = Date.now();
+                    if (Notification.permission === 'granted') new Notification('Krishan ji', { body: `2 minutes until ${s.subject} starts!` });
+                    playBeep('reminder');
+                }
+                if (s.start === curTime && !lastNotified[idStart]) {
+                    lastNotified[idStart] = Date.now();
+                    if (Notification.permission === 'granted') new Notification('Krishan ji', { body: `${s.subject} started!` });
+                    playBeep('start');
+                }
+                if (s.end === curTime && !lastNotified[idEnd]) {
+                    lastNotified[idEnd] = Date.now();
+                    if (Notification.permission === 'granted') new Notification('Krishan ji', { body: `${s.subject} finished!` });
+                    playBeep('end');
+                }
+            });
+        }
+
+        // AI Parser
+        function parseInput(text) {
+            const results = [];
+            const parts = text.split(/\s+(?:and|aur|,|&)\s+/i);
+            for (let part of parts) {
+                let subject = 'Study';
+                let startTime = null, endTime = null;
+                let targetDate = new Date();
+
+                if (part.includes('today')) targetDate = new Date();
+                else if (part.includes('tomorrow') || part.includes('kal')) targetDate.setDate(targetDate.getDate()+1);
+                else if (part.includes('day after') || part.includes('parson')) targetDate.setDate(targetDate.getDate()+2);
+                else if (part.includes('next week')) targetDate.setDate(targetDate.getDate()+7);
+                else if (part.includes('next monday')) targetDate.setDate(targetDate.getDate() + ((8 - targetDate.getDay()) % 7 || 7));
+
+                const timeMatch = part.match(/(\d{1,2})(?::(\d{2}))?\s*(?:am|pm)?\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*(?:am|pm)?/i);
+                if (timeMatch) {
+                    let sh = parseInt(timeMatch[1]), sm = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
+                    let eh = parseInt(timeMatch[3]), em = timeMatch[4] ? parseInt(timeMatch[4]) : 0;
+                    if (timeMatch[0].includes('pm') && sh < 12) sh += 12;
+                    if (timeMatch[0].includes('am') && sh === 12) sh = 0;
+                    if (timeMatch[0].includes('pm') && eh < 12) eh += 12;
+                    if (timeMatch[0].includes('am') && eh === 12) eh = 0;
+                    startTime = `${sh.toString().padStart(2,'0')}:${sm.toString().padStart(2,'0')}`;
+                    endTime = `${eh.toString().padStart(2,'0')}:${em.toString().padStart(2,'0')}`;
+                    const before = part.split(timeMatch[0])[0].trim();
+                    const words = before.split(/\s+/);
+                    subject = words[words.length-1] || subject;
+                } else {
+                    const hourMatch = part.match(/(\d+)\s*(?:hours?|h)/i);
+                    if (hourMatch) {
+                        const hrs = parseInt(hourMatch[1]);
+                        const now = new Date();
+                        now.setMinutes(0,0,0);
+                        now.setHours(now.getHours()+1);
+                        startTime = now.toTimeString().slice(0,5);
+                        const end = new Date(now.getTime() + hrs*60*60*1000);
+                        endTime = end.toTimeString().slice(0,5);
+                        const before = part.split(hourMatch[0])[0].trim();
+                        const words = before.split(/\s+/);
+                        subject = words[words.length-1] || subject;
+                    }
+                }
+
+                if (startTime && endTime) {
+                    results.push({
+                        subject: correctSubject(subject),
+                        start: startTime,
+                        end: endTime,
+                        date: targetDate.toISOString().split('T')[0]
+                    });
+                }
+            }
+            return results;
+        }
+
+        window.processAI = function() {
+            const text = document.getElementById('aiInput').value.trim();
+            if (!text) return alert('Please enter something!');
+            const parsed = parseInput(text);
+            if (parsed.length === 0) {
+                document.getElementById('aiSuggestions').innerHTML = `
+                    <span class="filter-btn" onclick="useSuggestion('math 9-11')">math 9-11</span>
+                    <span class="filter-btn" onclick="useSuggestion('physics 2h')">physics 2h</span>
+                    <span class="filter-btn" onclick="useSuggestion('chemistry tomorrow 10-12')">chemistry tomorrow 10-12</span>
+                `;
+                return;
+            }
+            parsed.forEach(p => {
+                slots.push({ id: Date.now() + Math.random(), ...p, completed: false });
+            });
+            save();
+            renderAll();
+            document.getElementById('aiInput').value = '';
+            document.getElementById('aiSuggestions').innerHTML = '';
+        };
+
+        window.useSuggestion = function(s) {
+            document.getElementById('aiInput').value = s;
+            processAI();
+        };
+
+        window.addManual = function() {
+            const sub = document.getElementById('manualSubject').value.trim();
+            const date = document.getElementById('manualDate').value;
+            const s = document.getElementById('manualStart').value;
+            const e = document.getElementById('manualEnd').value;
+            if (!sub || !date || !s || !e) return alert('Fill all fields');
+            if (s >= e) return alert('End must be after start');
+            slots.push({
+                id: Date.now() + Math.random(),
+                subject: correctSubject(sub),
+                start: s,
+                end: e,
+                completed: false,
+                date: date
+            });
+            save();
+            renderAll();
+            document.getElementById('manualSubject').value = '';
+            document.getElementById('manualStart').value = '';
+            document.getElementById('manualEnd').value = '';
+        };
+
+        window.toggle = function(id) {
+            const s = slots.find(x => x.id == id);
+            if (s) { s.completed = !s.completed; save(); renderAll(); }
+        };
+        window.del = function(id) {
+            slots = slots.filter(x => x.id != id); save(); renderAll();
+        };
+        window.resetAll = function() {
+            if (confirm('Delete all slots?')) { slots = []; save(); renderAll(); }
+        };
+
+        window.setGraph = function(g) {
+            graphType = g;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(g+'Btn').classList.add('active');
+            renderChart();
+        };
+
+        window.exportBackup = function() {
+            const data = JSON.stringify(slots, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `krishanji-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+        };
+        window.importBackup = function() {
+            const input = document.createElement('input');
+            input.type = 'file'; input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    try {
+                        const imported = JSON.parse(ev.target.result);
+                        if (Array.isArray(imported)) { slots = imported; save(); renderAll(); }
+                        else alert('Invalid file');
+                    } catch { alert('Invalid JSON'); }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        };
+
+        function renderAll() {
+            updateSubjectFilter();
+            renderSlots(selectedCalendarDate);
+            updateStats();
+            renderChart();
+            renderCalendar();
+        }
+
+        // Debounced resize
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (currentChart) renderChart();
+            }, 150);
+        }, { passive: true });
+
+        // Midnight date update check
+        function checkMidnightUpdate() {
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+            const timeToMidnight = midnight.getTime() + 24*60*60*1000 - now.getTime();
+            setTimeout(() => {
+                // Update manual date input to new today
+                const newToday = new Date().toISOString().split('T')[0];
+                document.getElementById('manualDate').value = newToday;
+                // Also update calendar if needed
+                renderAll();
+                // Reset the timer for next midnight
+                checkMidnightUpdate();
+            }, timeToMidnight);
+        }
+
+        // Init
+        window.onload = function() {
+            load();
+            updateAuthUI();
+            document.getElementById('barBtn').classList.add('active');
+            checkMidnightUpdate(); // Start midnight updater
+        };
+    })();
+</script>
+</body>
+</html>
